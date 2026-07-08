@@ -1,4 +1,4 @@
-package Entity;
+package com.example.InterviewIQ.Entity;
 
 
 import jakarta.persistence.*;
