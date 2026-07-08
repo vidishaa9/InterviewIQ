@@ -1,6 +1,6 @@
-package Repository;
+package com.example.InterviewIQ.Repository;
 
-import Entity.User;
+import com.example.InterviewIQ.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
