@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+body {
+  @apply bg-gray-950 text-gray-100 antialiased;
+}
+
+/* Reusable button styles via Tailwind @apply */
+.btn-primary {
+  @apply bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg
+         transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded-lg
+         transition-colors duration-200;
+}
+
+.card {
+  @apply bg-gray-900 border border-gray-800 rounded-xl p-6;
+}
+
+.input {
+  @apply w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-gray-100
+         placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500
+         focus:border-transparent transition-all duration-200;
+}
+
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
