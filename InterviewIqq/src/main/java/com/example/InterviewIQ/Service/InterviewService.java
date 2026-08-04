@@ -31,7 +31,7 @@ public class InterviewService {
     private final InterviewSessionRepository sessionRepository;
     private final InterviewQuestionRepository questionRepository;
     private final ResumeRepository resumeRepository;
-    private final GeminiService geminiService;
+    private final HuggingFaceService huggingFaceService;
     private final AnalyticsService analyticsService;
     private final ObjectMapper objectMapper;
 
@@ -56,8 +56,8 @@ public class InterviewService {
                 : (resume.getJobRoles() != null ? resume.getJobRoles() : "Software Developer");
 
         // Generate questions from Gemini
-        List<GeminiService.GeneratedQuestion> generatedQuestions =
-                geminiService.generateQuestions(skills, resume.getExperienceLevel(), targetRole);
+        List<HuggingFaceService.GeneratedQuestion> generatedQuestions =
+                huggingFaceService.generateQuestions(skills, resume.getExperienceLevel(), targetRole);
 
         // Create session
         InterviewSession session = InterviewSession.builder()
@@ -126,7 +126,7 @@ public class InterviewService {
         }
 
         // Call Gemini to evaluate the answer
-        GeminiService.AnswerEvaluation evaluation = geminiService.evaluateAnswer(
+        HuggingFaceService.AnswerEvaluation evaluation = huggingFaceService.evaluateAnswer(
                 question.getQuestionText(),
                 request.getAnswer(),
                 question.getCategory()
