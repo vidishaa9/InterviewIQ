@@ -38,7 +38,7 @@ public class AuthService {
 
         // Build and save user
         var user = User.builder()
-                .name(request.getFullName())
+                .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
