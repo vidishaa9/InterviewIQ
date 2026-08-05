@@ -19,7 +19,7 @@ public class AuthDTOs {
     @AllArgsConstructor
     public static class RegisterRequest {
         @NotBlank(message = "Name is required")
-        private String fullname;
+        private String name;
 
         @NotBlank(message = "Email is required")
         @Email(message = "Must be a valid email address")
