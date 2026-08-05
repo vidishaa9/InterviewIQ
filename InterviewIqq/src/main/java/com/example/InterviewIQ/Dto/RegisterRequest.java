@@ -9,7 +9,7 @@ import lombok.Data;
 public class RegisterRequest {
 
     @NotBlank(message = "Full name is required")
-    private String fullName;
+    private String Name;
 
     @Email(message="Invalid email")
     @NotBlank(message = "Email is required")
