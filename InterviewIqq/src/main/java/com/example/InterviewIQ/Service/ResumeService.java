@@ -30,7 +30,7 @@ import java.util.UUID;
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
-    private final GeminiService geminiService;
+    private final HuggingFaceService huggingFaceService;
     private final ObjectMapper objectMapper;
 
     @Value("${app.upload.dir}")
@@ -38,21 +38,14 @@ public class ResumeService {
 
     @Transactional
     public ResumeDTO uploadAndProcess(MultipartFile file, User currentUser) throws IOException {
-        // 1. Validate
         validatePdfFile(file);
-
-        // 2. Save file to disk
         String savedPath = saveFileToDisk(file);
-
-        // 3. Extract text from PDF
         String rawText = extractTextFromPdf(savedPath);
         log.debug("Extracted {} characters from PDF", rawText.length());
 
-        // 4. Call Gemini to extract skills
-        GeminiService.SkillExtractionResult extraction = geminiService.extractSkills(rawText);
+        HuggingFaceService.SkillExtractionResult extraction = huggingFaceService.extractSkills(rawText);
         log.debug("Gemini extracted {} skills", extraction.getSkills().size());
 
-        // 5. Save to DB
         Resume resume = Resume.builder()
                 .user(currentUser)
                 .fileName(file.getOriginalFilename())
@@ -86,9 +79,11 @@ public class ResumeService {
     public void deleteResume(Long resumeId, User currentUser) {
         Resume resume = resumeRepository.findByIdAndUserId(resumeId, currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
-        // Delete file from disk
-        try { Files.deleteIfExists(Paths.get(resume.getFilePath())); }
-        catch (IOException e) { log.warn("Could not delete file: {}", resume.getFilePath()); }
+        try {
+            Files.deleteIfExists(Paths.get(resume.getFilePath()));
+        } catch (IOException e) {
+            log.warn("Could not delete file: {}", resume.getFilePath());
+        }
         resumeRepository.delete(resume);
     }
 
@@ -102,18 +97,16 @@ public class ResumeService {
         if (contentType == null || !contentType.equals("application/pdf")) {
             throw new IllegalArgumentException("Only PDF files are accepted");
         }
-        if (file.getSize() > 10 * 1024 * 1024) { // 10MB
+        if (file.getSize() > 10 * 1024 * 1024) {
             throw new IllegalArgumentException("File size must not exceed 10MB");
         }
     }
 
     private String saveFileToDisk(MultipartFile file) throws IOException {
-        // Create upload directory if it doesn't exist
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
-        // UUID prevents filename conflicts and directory traversal attacks
         String uniqueFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path filePath = uploadPath.resolve(uniqueFileName);
         Files.write(filePath, file.getBytes());
@@ -121,10 +114,11 @@ public class ResumeService {
     }
 
     private String extractTextFromPdf(String filePath) throws IOException {
+        // Fix for OneDrive JDK path — awt.dll cloud sync issue
+        System.setProperty("java.awt.headless", "true");
         try (PDDocument document = Loader.loadPDF(new File(filePath))) {
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(document);
-
             return text.length() > 8000 ? text.substring(0, 8000) : text;
         }
     }
